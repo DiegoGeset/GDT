@@ -40,8 +40,8 @@ if (Test-Path $versionFile) {
 }
 
 # --- Substituição do operador ?? ---
-$localVerDisplay = if ($localVersion) { $localVersion } else { 'nenhuma' }
-$remoteVerDisplay = if ($remoteVersion) { $remoteVersion } else { 'desconhecida' }
+$localVerDisplay = $localVersion -or 'nenhuma'
+$remoteVerDisplay = $remoteVersion -or 'desconhecida'
 
 Write-Host "Versão local:  $localVerDisplay"
 Write-Host "Versão remota: $remoteVerDisplay"
