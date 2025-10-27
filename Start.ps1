@@ -9,7 +9,7 @@ $repoBranch = "main"
 $localPath = "C:\GESET"
 $zipFile = Join-Path $localPath "versao.zip"
 $versionFile = Join-Path $localPath "version.txt"
-$remoteVersionURL = "https://raw.githubusercontent.com/DiegoGeset/GDT/refs/heads/main/Version.txt?token=GHSAT0AAAAAADM5ABLN3HXNLLCTUD5O5VOU2H7VYWQ"
+$remoteVersionURL = "https://cdn.jsdelivr.net/gh/DiegoGeset/GDT@main/Version.txt"
 $zipDownloadURL = "https://github.com/DiegoGeset/GDT/archive/refs/tags/1.0.0.zip"
 $mainScript = Join-Path $localPath "$repoName-main\gdt.ps1"
 
@@ -39,8 +39,12 @@ if (Test-Path $versionFile) {
     $localVersion = (Get-Content $versionFile -Raw).Trim()
 }
 
-Write-Host "Versão local:  $($localVersion ?? 'nenhuma')"
-Write-Host "Versão remota: $($remoteVersion ?? 'desconhecida')"
+# --- Substituição do operador ?? ---
+$localVerDisplay = if ($localVersion) { $localVersion } else { 'nenhuma' }
+$remoteVerDisplay = if ($remoteVersion) { $remoteVersion } else { 'desconhecida' }
+
+Write-Host "Versão local:  $localVerDisplay"
+Write-Host "Versão remota: $remoteVerDisplay"
 
 # --- Determina se precisa atualizar/baixar ---
 $precisaAtualizar = $false
