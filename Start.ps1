@@ -45,7 +45,7 @@ if (Test-Path $versionFile) {
     $localVersion = (Get-Content $versionFile -Raw).Trim()
 }
 
-# Mostra versões de forma compatível com qualquer PowerShell
+# Mostra versões de forma compatível
 $localVerDisplay  = if ($localVersion -and $localVersion -ne '') { $localVersion } else { 'nenhuma' }
 $remoteVerDisplay = if ($remoteVersion -and $remoteVersion -ne '') { $remoteVersion } else { 'desconhecida' }
 
@@ -92,13 +92,14 @@ if ($precisaAtualizar) {
     }
 }
 
-# Procura o script principal em qualquer subpasta dentro do localPath
-$mainScript = Get-ChildItem -Path $localPath -Filter "gdt.ps1" -Recurse -File | Select-Object -First 1
+# Detecta a pasta correta (pega a mais recente)
+$extractedFolder = Get-ChildItem -Path $localPath -Directory | Where-Object { $_.Name -like "$repoName*" } | Sort-Object Name -Descending | Select-Object -First 1
+$mainScript = Join-Path $extractedFolder.FullName "gdt.ps1"
 
 # Executa script principal
-if ($mainScript -and (Test-Path $mainScript.FullName)) {
+if (Test-Path $mainScript) {
     Write-Host "🚀 Iniciando script principal (gdt.ps1)..."
-    & powershell -ExecutionPolicy Bypass -File $mainScript.FullName
+    & powershell -ExecutionPolicy Bypass -File $mainScript
 } else {
     Write-Host "❌ ERRO: Script principal não encontrado após atualização."
 }
