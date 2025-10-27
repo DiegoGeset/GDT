@@ -1,0 +1,4 @@
+# ============================================================
+# Script: Restaurar Menu Clássico do Windows 11
+# Descrição: Altera o registro para restaurar o menu de contexto clássico.
+# ============================================================

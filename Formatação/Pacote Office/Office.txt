@@ -1,0 +1,5 @@
+# ============================================
+# Script de Instalação do Pacote Office
+# Versões disponiveis 2016/2019/2021/2024
+# Autor: Diego Geset
+# ============================================
