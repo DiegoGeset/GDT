@@ -25,32 +25,32 @@ if (!(Test-Path $localPath)) {
 }
 
 # --- Obtém versão remota ---
+$remoteVersion = $null
 try {
     $remoteVersion = (Invoke-WebRequest -Uri $remoteVersionURL -UseBasicParsing).Content.Trim()
+    if ([string]::IsNullOrWhiteSpace($remoteVersion)) { $remoteVersion = $null }
 } catch {
     Write-Host "⚠️ Não foi possível obter a versão remota."
-    $remoteVersion = $null
 }
 
 # --- Obtém versão local ---
+$localVersion = $null
 if (Test-Path $versionFile) {
-    $localVersion = Get-Content $versionFile -Raw
-} else {
-    $localVersion = $null
+    $localVersion = (Get-Content $versionFile -Raw).Trim()
 }
 
 Write-Host "Versão local:  $($localVersion ?? 'nenhuma')"
 Write-Host "Versão remota: $($remoteVersion ?? 'desconhecida')"
 
-# --- Determina se deve atualizar ou instalar ---
+# --- Determina se precisa atualizar/baixar ---
 $precisaAtualizar = $false
 
 if (-not (Test-Path $mainScript)) {
-    Write-Host "⚙️ Script principal não encontrado. Será baixado."
+    Write-Host "⚙️ Script principal não encontrado. Baixando pacote..."
     $precisaAtualizar = $true
 }
 elseif (-not $remoteVersion) {
-    Write-Host "⚙️ Não foi possível obter versão remota. Reinstalando por segurança."
+    Write-Host "⚙️ Versão remota não disponível. Forçando reinstalação..."
     $precisaAtualizar = $true
 }
 elseif ($localVersion -ne $remoteVersion) {
@@ -61,25 +61,33 @@ else {
     Write-Host "Nenhuma atualização necessária."
 }
 
-# --- Processo de atualização ---
+# --- Atualiza ou instala ---
 if ($precisaAtualizar) {
-    if (Test-Path $zipFile) { Remove-Item $zipFile -Force }
+    try {
+        if (Test-Path $zipFile) { Remove-Item $zipFile -Force }
+        Write-Host "📦 Baixando nova versão..."
+        Download-File $zipDownloadURL $zipFile
 
-    Download-File $zipDownloadURL $zipFile
+        Write-Host "🗑️ Limpando versão anterior..."
+        Get-ChildItem -Path $localPath -Exclude "versao.zip" | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
 
-    Write-Host "Extraindo arquivos..."
-    Expand-Archive -Path $zipFile -DestinationPath $localPath -Force
+        Write-Host "📂 Extraindo arquivos..."
+        Expand-Archive -Path $zipFile -DestinationPath $localPath -Force
 
-    if ($remoteVersion) {
-        $remoteVersion | Out-File $versionFile -Encoding UTF8
+        if ($remoteVersion) {
+            $remoteVersion | Out-File $versionFile -Encoding UTF8
+        }
+
+        Write-Host "✅ Instalação/Atualização concluída."
     }
-
-    Write-Host "✅ Instalação/Atualização concluída."
+    catch {
+        Write-Host "❌ Erro durante a atualização: $($_.Exception.Message)"
+    }
 }
 
-# --- Executa o script principal ---
+# --- Executa script principal ---
 if (Test-Path $mainScript) {
-    Write-Host "Iniciando script principal (gdt.ps1)..."
+    Write-Host "🚀 Iniciando script principal (gdt.ps1)..."
     & powershell -ExecutionPolicy Bypass -File $mainScript
 } else {
     Write-Host "❌ ERRO: Script principal não encontrado após atualização."
