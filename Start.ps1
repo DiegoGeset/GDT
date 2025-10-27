@@ -10,15 +10,13 @@ $repoName = "GDT"
 $repoBranch = "main"
 
 # Pastas e arquivos locais
-$localPath    = "C:\GESET"
-$zipFile      = Join-Path $localPath "versao.zip"
-$versionFile  = Join-Path $localPath "version.txt"
-$mainScript   = Join-Path $localPath "$repoName-main\gdt.ps1"
+$localPath   = "C:\GESET"
+$zipFile     = Join-Path $localPath "versao.zip"
+$versionFile = Join-Path $localPath "version.txt"
 
-# URLs remotas via jsDelivr (CDN)
+# URLs remotas via jsDelivr
 $remoteVersionURL = "https://cdn.jsdelivr.net/gh/DiegoGeset/GDT@main/Version.txt"
 $zipDownloadURL   = "https://github.com/DiegoGeset/GDT/archive/refs/tags/1.0.0.zip"
-$startScriptURL   = "https://cdn.jsdelivr.net/gh/DiegoGeset/GDT@main/Start.ps1"
 
 # Função para download de arquivos
 function Download-File($url, $dest) {
@@ -47,28 +45,25 @@ if (Test-Path $versionFile) {
     $localVersion = (Get-Content $versionFile -Raw).Trim()
 }
 
-# Substituição do operador ?? pelo -or
-$localVerDisplay  = $localVersion  -or 'nenhuma'
-$remoteVerDisplay = $remoteVersion -or 'desconhecida'
+# Mostra as versões corretamente
+$localVerDisplay  = if ($localVersion)  { $localVersion  } else { 'nenhuma' }
+$remoteVerDisplay = if ($remoteVersion) { $remoteVersion } else { 'desconhecida' }
 
-Write-Host "Versão local: $localVerDisplay"
+Write-Host "Versão local:  $localVerDisplay"
 Write-Host "Versão remota: $remoteVerDisplay"
 
 # Determina se precisa atualizar
 $precisaAtualizar = $false
-if (-not (Test-Path $mainScript)) {
+if (-not (Get-ChildItem -Path $localPath -Directory | Where-Object { $_.Name -like "$repoName*" })) {
     Write-Host "⚙️ Script principal não encontrado. Baixando pacote..."
     $precisaAtualizar = $true
-}
-elseif (-not $remoteVersion) {
+} elseif (-not $remoteVersion) {
     Write-Host "⚙️ Versão remota não disponível. Forçando reinstalação..."
     $precisaAtualizar = $true
-}
-elseif ($localVersion -ne $remoteVersion) {
+} elseif ($localVersion -ne $remoteVersion) {
     Write-Host "🆕 Nova versão detectada."
     $precisaAtualizar = $true
-}
-else {
+} else {
     Write-Host "Nenhuma atualização necessária."
 }
 
@@ -90,11 +85,14 @@ if ($precisaAtualizar) {
         }
 
         Write-Host "✅ Instalação/Atualização concluída."
-    }
-    catch {
+    } catch {
         Write-Host "❌ Erro durante a atualização: $($_.Exception.Message)"
     }
 }
+
+# Detecta a pasta extraída mais recente do GDT
+$extractedFolder = Get-ChildItem -Path $localPath -Directory | Where-Object { $_.Name -like "$repoName*" } | Sort-Object Name -Descending | Select-Object -First 1
+$mainScript = Join-Path $extractedFolder.FullName "gdt.ps1"
 
 # Executa script principal
 if (Test-Path $mainScript) {
