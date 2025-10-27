@@ -4,28 +4,28 @@
 
 $ErrorActionPreference = "Stop"
 
-# Configurações
+# Configurações do repositório
 $repoUser   = "DiegoGeset"
 $repoName   = "GDT"
 $repoBranch = "main"
 
-# Pastas locais
+# Pastas e arquivos locais
 $localPath   = "C:\GESET"
 $zipFile     = Join-Path $localPath "versao.zip"
 $versionFile = Join-Path $localPath "version.txt"
 
-# URLs
-$remoteVersionURL = "https://raw.githubusercontent.com/DiegoGeset/GDT/main/Version.txt"
+# URLs remotas
+$remoteVersionURL = "https://cdn.jsdelivr.net/gh/DiegoGeset/GDT@main/Version.txt"
 $zipDownloadURL   = "https://github.com/DiegoGeset/GDT/archive/refs/tags/1.0.0.zip"
 
-# Função de download
+# Função para download de arquivos
 function Download-File($url, $dest) {
     Write-Host "Baixando: $url..."
     Invoke-WebRequest -Uri $url -OutFile $dest -UseBasicParsing
 }
 
-# Cria pasta
-if (!(Test-Path $localPath)) {
+# Cria pasta se não existir
+if (-not (Test-Path $localPath)) {
     Write-Host "Criando pasta: $localPath"
     New-Item -Path $localPath -ItemType Directory | Out-Null
 }
@@ -55,6 +55,7 @@ Write-Host "Versão remota: $remoteVerDisplay"
 # Determina se precisa atualizar
 $precisaAtualizar = $false
 $existingFolder = Get-ChildItem -Path $localPath -Directory | Where-Object { $_.Name -like "$repoName*" }
+
 if (-not $existingFolder) {
     Write-Host "⚙️ Script principal não encontrado. Baixando pacote..."
     $precisaAtualizar = $true
@@ -92,14 +93,13 @@ if ($precisaAtualizar) {
     }
 }
 
-# Detecta a pasta correta (pega a mais recente)
-$extractedFolder = Get-ChildItem -Path $localPath -Directory | Where-Object { $_.Name -like "$repoName*" } | Sort-Object Name -Descending | Select-Object -First 1
-$mainScript = Join-Path $extractedFolder.FullName "gdt.ps1"
+# Procura recursivamente o gdt.ps1 em qualquer subpasta do localPath
+$mainScript = Get-ChildItem -Path $localPath -Recurse -Filter "gdt.ps1" | Select-Object -First 1
 
 # Executa script principal
-if (Test-Path $mainScript) {
+if ($mainScript -and (Test-Path $mainScript.FullName)) {
     Write-Host "🚀 Iniciando script principal (gdt.ps1)..."
-    & powershell -ExecutionPolicy Bypass -File $mainScript
+    & powershell -ExecutionPolicy Bypass -File $mainScript.FullName
 } else {
     Write-Host "❌ ERRO: Script principal não encontrado após atualização."
 }
