@@ -4,28 +4,28 @@
 
 $ErrorActionPreference = "Stop"
 
-# Configurações do repositório
+# Configurações
 $repoUser   = "DiegoGeset"
 $repoName   = "GDT"
 $repoBranch = "main"
 
-# Pastas e arquivos locais
+# Pastas locais
 $localPath   = "C:\GESET"
 $zipFile     = Join-Path $localPath "versao.zip"
 $versionFile = Join-Path $localPath "version.txt"
 
 # URLs remotas
-$remoteVersionURL = "https://cdn.jsdelivr.net/gh/DiegoGeset/GDT@main/Version.txt"
+$remoteVersionURL = "https://raw.githubusercontent.com/DiegoGeset/GDT/main/Version.txt"
 $zipDownloadURL   = "https://github.com/DiegoGeset/GDT/archive/refs/tags/1.0.0.zip"
 
-# Função para download de arquivos
+# Função de download
 function Download-File($url, $dest) {
     Write-Host "Baixando: $url..."
     Invoke-WebRequest -Uri $url -OutFile $dest -UseBasicParsing
 }
 
 # Cria pasta se não existir
-if (-not (Test-Path $localPath)) {
+if (!(Test-Path $localPath)) {
     Write-Host "Criando pasta: $localPath"
     New-Item -Path $localPath -ItemType Directory | Out-Null
 }
@@ -45,7 +45,7 @@ if (Test-Path $versionFile) {
     $localVersion = (Get-Content $versionFile -Raw).Trim()
 }
 
-# Mostra versões de forma compatível
+# Mostra versões corretamente
 $localVerDisplay  = if ($localVersion -and $localVersion -ne '') { $localVersion } else { 'nenhuma' }
 $remoteVerDisplay = if ($remoteVersion -and $remoteVersion -ne '') { $remoteVersion } else { 'desconhecida' }
 
@@ -55,7 +55,6 @@ Write-Host "Versão remota: $remoteVerDisplay"
 # Determina se precisa atualizar
 $precisaAtualizar = $false
 $existingFolder = Get-ChildItem -Path $localPath -Directory | Where-Object { $_.Name -like "$repoName*" }
-
 if (-not $existingFolder) {
     Write-Host "⚙️ Script principal não encontrado. Baixando pacote..."
     $precisaAtualizar = $true
@@ -93,7 +92,7 @@ if ($precisaAtualizar) {
     }
 }
 
-# Procura recursivamente o gdt.ps1 em qualquer subpasta do localPath
+# Procura recursivamente pelo script principal
 $mainScript = Get-ChildItem -Path $localPath -Recurse -Filter "gdt.ps1" | Select-Object -First 1
 
 # Executa script principal
