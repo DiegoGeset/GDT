@@ -46,8 +46,8 @@ if (Test-Path $versionFile) {
 }
 
 # Mostra as versões corretamente
-$localVerDisplay  = if ($localVersion)  { $localVersion  } else { 'nenhuma' }
-$remoteVerDisplay = if ($remoteVersion) { $remoteVersion } else { 'desconhecida' }
+$localVerDisplay = $localVersion -or 'nenhuma'
+$remoteVerDisplay = $remoteVersion -or 'desconhecida'
 
 Write-Host "Versão local:  $localVerDisplay"
 Write-Host "Versão remota: $remoteVerDisplay"
@@ -101,3 +101,4 @@ if (Test-Path $mainScript) {
 } else {
     Write-Host "❌ ERRO: Script principal não encontrado após atualização."
 }
+
