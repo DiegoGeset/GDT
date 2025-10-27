@@ -3,28 +3,36 @@
 # ========================================================
 
 $ErrorActionPreference = "Stop"
+
+# Configurações do repositório
 $repoUser = "DiegoGeset"
 $repoName = "GDT"
 $repoBranch = "main"
-$localPath = "C:\GESET"
-$zipFile = Join-Path $localPath "versao.zip"
-$versionFile = Join-Path $localPath "version.txt"
-$remoteVersionURL = "https://cdn.jsdelivr.net/gh/DiegoGeset/GDT@main/Version.txt"
-$zipDownloadURL = "https://github.com/DiegoGeset/GDT/archive/refs/tags/1.0.0.zip"
-$mainScript = Join-Path $localPath "$repoName-main\gdt.ps1"
 
+# Pastas e arquivos locais
+$localPath    = "C:\GESET"
+$zipFile      = Join-Path $localPath "versao.zip"
+$versionFile  = Join-Path $localPath "version.txt"
+$mainScript   = Join-Path $localPath "$repoName-main\gdt.ps1"
+
+# URLs remotas via jsDelivr (CDN)
+$remoteVersionURL = "https://cdn.jsdelivr.net/gh/DiegoGeset/GDT@main/Version.txt"
+$zipDownloadURL   = "https://github.com/DiegoGeset/GDT/archive/refs/tags/1.0.0.zip"
+$startScriptURL   = "https://cdn.jsdelivr.net/gh/DiegoGeset/GDT@main/Start.ps1"
+
+# Função para download de arquivos
 function Download-File($url, $dest) {
     Write-Host "Baixando: $url..."
     Invoke-WebRequest -Uri $url -OutFile $dest -UseBasicParsing
 }
 
-# --- Cria pasta se não existir ---
+# Cria pasta se não existir
 if (!(Test-Path $localPath)) {
     Write-Host "Criando pasta: $localPath"
     New-Item -Path $localPath -ItemType Directory | Out-Null
 }
 
-# --- Obtém versão remota ---
+# Obtém versão remota
 $remoteVersion = $null
 try {
     $remoteVersion = (Invoke-WebRequest -Uri $remoteVersionURL -UseBasicParsing).Content.Trim()
@@ -33,22 +41,21 @@ try {
     Write-Host "⚠️ Não foi possível obter a versão remota."
 }
 
-# --- Obtém versão local ---
+# Obtém versão local
 $localVersion = $null
 if (Test-Path $versionFile) {
     $localVersion = (Get-Content $versionFile -Raw).Trim()
 }
 
-# --- Substituição do operador ?? ---
-$localVerDisplay = $localVersion -or 'nenhuma'
+# Substituição do operador ?? pelo -or
+$localVerDisplay  = $localVersion  -or 'nenhuma'
 $remoteVerDisplay = $remoteVersion -or 'desconhecida'
 
-Write-Host "Versão local:  $localVerDisplay"
+Write-Host "Versão local: $localVerDisplay"
 Write-Host "Versão remota: $remoteVerDisplay"
 
-# --- Determina se precisa atualizar/baixar ---
+# Determina se precisa atualizar
 $precisaAtualizar = $false
-
 if (-not (Test-Path $mainScript)) {
     Write-Host "⚙️ Script principal não encontrado. Baixando pacote..."
     $precisaAtualizar = $true
@@ -65,7 +72,7 @@ else {
     Write-Host "Nenhuma atualização necessária."
 }
 
-# --- Atualiza ou instala ---
+# Atualiza ou instala
 if ($precisaAtualizar) {
     try {
         if (Test-Path $zipFile) { Remove-Item $zipFile -Force }
@@ -89,7 +96,7 @@ if ($precisaAtualizar) {
     }
 }
 
-# --- Executa script principal ---
+# Executa script principal
 if (Test-Path $mainScript) {
     Write-Host "🚀 Iniciando script principal (gdt.ps1)..."
     & powershell -ExecutionPolicy Bypass -File $mainScript
