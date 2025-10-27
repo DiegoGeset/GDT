@@ -4,27 +4,27 @@
 
 $ErrorActionPreference = "Stop"
 
-# Configurações do repositório
-$repoUser = "DiegoGeset"
-$repoName = "GDT"
+# Configurações
+$repoUser   = "DiegoGeset"
+$repoName   = "GDT"
 $repoBranch = "main"
 
-# Pastas e arquivos locais
+# Pastas locais
 $localPath   = "C:\GESET"
 $zipFile     = Join-Path $localPath "versao.zip"
 $versionFile = Join-Path $localPath "version.txt"
 
-# URLs remotas via jsDelivr
-$remoteVersionURL = "https://cdn.jsdelivr.net/gh/DiegoGeset/GDT@main/Version.txt"
+# URLs
+$remoteVersionURL = "https://raw.githubusercontent.com/DiegoGeset/GDT/main/Version.txt"
 $zipDownloadURL   = "https://github.com/DiegoGeset/GDT/archive/refs/tags/1.0.0.zip"
 
-# Função para download de arquivos
+# Função de download
 function Download-File($url, $dest) {
     Write-Host "Baixando: $url..."
     Invoke-WebRequest -Uri $url -OutFile $dest -UseBasicParsing
 }
 
-# Cria pasta se não existir
+# Cria pasta
 if (!(Test-Path $localPath)) {
     Write-Host "Criando pasta: $localPath"
     New-Item -Path $localPath -ItemType Directory | Out-Null
@@ -45,16 +45,17 @@ if (Test-Path $versionFile) {
     $localVersion = (Get-Content $versionFile -Raw).Trim()
 }
 
-# Mostra as versões corretamente
-$localVerDisplay = $localVersion -or 'nenhuma'
-$remoteVerDisplay = $remoteVersion -or 'desconhecida'
+# Mostra versões de forma compatível
+$localVerDisplay  = if ($localVersion -and $localVersion -ne '') { $localVersion } else { 'nenhuma' }
+$remoteVerDisplay = if ($remoteVersion -and $remoteVersion -ne '') { $remoteVersion } else { 'desconhecida' }
 
 Write-Host "Versão local:  $localVerDisplay"
 Write-Host "Versão remota: $remoteVerDisplay"
 
 # Determina se precisa atualizar
 $precisaAtualizar = $false
-if (-not (Get-ChildItem -Path $localPath -Directory | Where-Object { $_.Name -like "$repoName*" })) {
+$existingFolder = Get-ChildItem -Path $localPath -Directory | Where-Object { $_.Name -like "$repoName*" }
+if (-not $existingFolder) {
     Write-Host "⚙️ Script principal não encontrado. Baixando pacote..."
     $precisaAtualizar = $true
 } elseif (-not $remoteVersion) {
@@ -71,6 +72,7 @@ if (-not (Get-ChildItem -Path $localPath -Directory | Where-Object { $_.Name -li
 if ($precisaAtualizar) {
     try {
         if (Test-Path $zipFile) { Remove-Item $zipFile -Force }
+
         Write-Host "📦 Baixando nova versão..."
         Download-File $zipDownloadURL $zipFile
 
@@ -90,7 +92,7 @@ if ($precisaAtualizar) {
     }
 }
 
-# Detecta a pasta extraída mais recente do GDT
+# Detecta a pasta correta (pega a mais recente)
 $extractedFolder = Get-ChildItem -Path $localPath -Directory | Where-Object { $_.Name -like "$repoName*" } | Sort-Object Name -Descending | Select-Object -First 1
 $mainScript = Join-Path $extractedFolder.FullName "gdt.ps1"
 
@@ -101,4 +103,3 @@ if (Test-Path $mainScript) {
 } else {
     Write-Host "❌ ERRO: Script principal não encontrado após atualização."
 }
-
