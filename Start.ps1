@@ -9,13 +9,29 @@ $repoUser   = "DiegoGeset"
 $repoName   = "GDT"
 $localPath  = "C:\GESET"
 $zipFile    = Join-Path $localPath "versao.zip"
-$remoteZip  = "https://github.com/DiegoGeset/GDT/archive/refs/tags/1.0.1.zip"
+$remoteZip  = ""  # Será definido dinamicamente
 
 # Função para download
 function Download-File($url, $dest) {
     Write-Host "Baixando: $url..."
     Invoke-WebRequest -Uri $url -OutFile $dest -UseBasicParsing
 }
+
+# Função para obter última versão do GitHub
+function Get-LatestRelease {
+    try {
+        $apiUrl = "https://api.github.com/repos/$repoUser/$repoName/releases/latest"
+        $release = Invoke-RestMethod -Uri $apiUrl -UseBasicParsing
+        return $release.tag_name
+    } catch {
+        Write-Host "⚠️ Não foi possível obter a versão mais recente. Usando valor padrão."
+        return "1.0.1"  # fallback caso a API falhe
+    }
+}
+
+# Detecta última versão
+$latestVersion = Get-LatestRelease
+$remoteZip = "https://github.com/$repoUser/$repoName/archive/refs/tags/$latestVersion.zip"
 
 # Cria pasta se não existir
 if (!(Test-Path $localPath)) {
@@ -27,7 +43,7 @@ if (!(Test-Path $localPath)) {
 try {
     if (Test-Path $zipFile) { Remove-Item $zipFile -Force }
 
-    Write-Host "📦 Baixando nova versão..."
+    Write-Host "📦 Baixando nova versão ($latestVersion)..."
     Download-File $remoteZip $zipFile
 
     Write-Host "🗑️ Limpando versão anterior..."
@@ -50,4 +66,3 @@ if ($gdtScript) {
 } else {
     Write-Host "❌ ERRO: Script principal não encontrado."
 }
-
