@@ -1,8 +1,0 @@
-# ============================================================
-# Script: Ajuste de Efeitos Visuais - Corrigido
-# Mantém apenas:
-#   - Mostrar miniaturas em vez de ícones
-#   - Mostrar retângulo de seleção translúcido
-#   - Usar fontes de tela com cantos arredondados
-# Autor : Geset
-# ============================================================
