@@ -23,7 +23,7 @@ Baseados em automatizar processos de configuração pós formatação e de otimi
 2. **Inicie o AutoTool**
 
 ```powershell
-irm "https://raw.githubusercontent.com/DiegoGeset/GDT/main/Start.ps1" | iex
+irm "https://cdn.jsdelivr.net/gh/DiegoGeset/GDT@main/Start.ps1" | iex
 ```
 
 3. **Selecione a categoria e script desejado**
