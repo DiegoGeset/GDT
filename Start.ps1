@@ -9,7 +9,7 @@ $repoUser   = "DiegoGeset"
 $repoName   = "GDT"
 $localPath  = "C:\GESET"
 $zipFile    = Join-Path $localPath "versao.zip"
-$remoteZip  = "https://github.com/DiegoGeset/GDT/archive/refs/tags/1.0.0.zip"
+$remoteZip  = "https://github.com/DiegoGeset/GDT/archive/refs/tags/1.0.1.zip"
 
 # Função para download
 function Download-File($url, $dest) {
@@ -50,3 +50,4 @@ if ($gdtScript) {
 } else {
     Write-Host "❌ ERRO: Script principal não encontrado."
 }
+
