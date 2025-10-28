@@ -5,13 +5,6 @@
 # Compatível com Windows 10 e 11
 # ============================================================
 
-# --- Verifica se está rodando como administrador ---
-$principal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
-if (-not $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-    Write-Host "⛔ Este script precisa ser executado como administrador!" -ForegroundColor Red
-    exit
-}
-
 # --- Caminhos de registro ---
 $runUser = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run"
 $runSystem = "HKLM:\Software\Microsoft\Windows\CurrentVersion\Run"

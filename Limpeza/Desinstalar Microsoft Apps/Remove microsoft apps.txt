@@ -1,5 +1,5 @@
 # ============================================================
 # Script: Desinstalação Interativa de Aplicativos Microsoft
-# Função: Lista aplicativos instalados, permite escolher quais desinstalar ou todos de uma vez
+# Função: Lista aplicativos instalados da propria microsoft e permite escolher quais desinstalar ou todos de uma vez.
 # Autor : Geset
 # ============================================================

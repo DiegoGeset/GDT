@@ -1,0 +1,6 @@
+# ============================================================
+# Script: Gerenciador de Programas de Inicialização
+# Função: Lista, ativa, desativa e recupera programas de inicialização (Startup)
+# Autor: Geset (adaptado por GPT-5)
+# Compatível com Windows 10 e 11
+# ============================================================

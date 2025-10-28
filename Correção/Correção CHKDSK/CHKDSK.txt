@@ -1,0 +1,5 @@
+# ============================================================
+# Script: CHKDSK.ps1
+# Função: Lista a quantidade de disco rigido, da opção de escolha em qual é para executar o codigo de correção
+# Autor : Diego Geset
+# ============================================================

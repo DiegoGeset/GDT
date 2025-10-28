@@ -1,7 +1,7 @@
 ﻿# ==========================================================
 # Script: Gerenciar Usuário "Administrador"
-# Função: Cria, reativa e configura o usuário Administrador,
-#         definindo senha e políticas ao final do processo
+# Função: Localiza, reativa e configura o usuário Administrador,
+#         solicitando senha somente ao final
 # ==========================================================
 
 # --- Garante execução como Administrador ---
@@ -11,12 +11,6 @@ if (-not $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administra
     Start-Process powershell -Verb RunAs -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`""
     exit
 }
-
-# --- Solicita senha desejada ---
-Write-Host ""
-Write-Host "Digite a senha que deseja definir para o usuário 'Administrador':" -ForegroundColor Yellow
-$PlainPassword = Read-Host "Senha"
-$SecurePassword = ConvertTo-SecureString $PlainPassword -AsPlainText -Force
 
 # --- Nome do usuário ---
 $UserName = "Administrador"
@@ -28,6 +22,12 @@ $User = Get-LocalUser -Name $UserName -ErrorAction SilentlyContinue
 if (-not $User) {
     Write-Host "Usuário 'Administrador' não encontrado. Criando nova conta..." -ForegroundColor Yellow
     try {
+        # Solicita senha apenas na criação
+        Write-Host ""
+        Write-Host "Digite a senha que deseja definir para o novo usuário 'Administrador':" -ForegroundColor Yellow
+        $PlainPassword = Read-Host "Senha"
+        $SecurePassword = ConvertTo-SecureString $PlainPassword -AsPlainText -Force
+
         New-LocalUser -Name $UserName `
                       -Password $SecurePassword `
                       -FullName "Administrador do Sistema" `
@@ -78,7 +78,16 @@ catch {
     Write-Host "❌ Erro ao verificar/adicionar grupo: $_" -ForegroundColor Red
 }
 
-# --- 4️⃣ Aplicação final da senha e políticas ---
+# --- 4️⃣ Solicita senha apenas agora (caso já exista a conta) ---
+if ($User) {
+    Write-Host ""
+    Write-Host "Digite a senha que deseja definir para o usuário 'Administrador':" -ForegroundColor Yellow
+    $PlainPassword = Read-Host "Senha"
+}
+
+$SecurePassword = ConvertTo-SecureString $PlainPassword -AsPlainText -Force
+
+# --- 5️⃣ Aplicação final da senha e políticas ---
 Write-Host "`n🔐 Aplicando senha e configurações finais..." -ForegroundColor Cyan
 try {
     # Troca a senha com 'net user' (mais confiável para contas internas)
@@ -95,7 +104,7 @@ catch {
     Write-Host "❌ Erro ao definir senha/configurações: $_" -ForegroundColor Red
 }
 
-# --- 5️⃣ Resumo final ---
+# --- 6️⃣ Resumo final ---
 Write-Host ""
 Write-Host "==========================================================" -ForegroundColor DarkGray
 Write-Host "✅ Usuário 'Administrador' está ativo e configurado corretamente."
